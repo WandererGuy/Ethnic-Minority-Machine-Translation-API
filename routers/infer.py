@@ -37,11 +37,11 @@ def load_main_tokenize_config():
     port_num = config['DEFAULT']['port'] 
     return host_ip, port_num
 
-def select_checkpoint(lang_source):
-    checkpoint_folder = "language_checkpoints"
-    if lang_source == "khmer":
-        checkpoint_path = os.path.join(checkpoint_folder, "khmer_model_step_125000.pt")
-    return checkpoint_path
+# def select_checkpoint(lang_source):
+#     checkpoint_folder = "language_checkpoints"
+#     if lang_source == "khmer":
+#         checkpoint_path = os.path.join(checkpoint_folder, "khmer_model_step_125000.pt")
+#     return checkpoint_path
 
 
 def translate_file(model_path, src_path, output_path):
@@ -95,13 +95,15 @@ def handle_response(response):
         raise MyHTTPException(status_code=500, message = f"send Request to another Backend, failed with status code {response.status_code}")
     
 def send_request_tokenize(file_to_tokenize_path: str, 
-                          lang_source: str
+                          lang_source: str,
+                          trained_tokenizer_name: str 
                           ):
     host_ip, port_num = load_main_tokenize_config()
     url_tokenize = f"http://{host_ip}:{port_num}/tokenize-language"
 
     payload = {"file_to_tokenize_path" : file_to_tokenize_path, 
-               "lang_source" : lang_source
+               "lang_source" : lang_source, 
+               "trained_tokenizer_name" : trained_tokenizer_name
     }
     files=[
     ]
@@ -113,7 +115,10 @@ def send_request_tokenize(file_to_tokenize_path: str,
 async def translate_language(
     file_to_translate_path: str = Form(...),
     lang_source: str = Form(...),
+    model_checkpoint_name : str = Form(...),
+    trained_tokenizer_name: str = Form(...)
 ):
+    checkpoint_folder = "lang_checkpoints"
     host_ip, port_num = load_main_config()
 
     allow_lang = ["khmer"]
@@ -121,14 +126,15 @@ async def translate_language(
         raise MyHTTPException(status_code=400, message="Language not supported")
 
     res = send_request_tokenize(file_to_tokenize_path = file_to_translate_path, 
-                            lang_source = lang_source
+                            lang_source = lang_source,
+                            trained_tokenizer_name = trained_tokenizer_name
                             )
     res_json = handle_response(res)
     tokenized_file_path = res_json["result"]
     output_filepath = os.path.join(translate_output_folder, str(uuid.uuid4()) + ".txt")
 
     translate_file(
-        model_path=select_checkpoint(lang_source),
+        model_path=os.path.join(checkpoint_folder, model_checkpoint_name),
         src_path=tokenized_file_path,
         output_path=output_filepath)
 
