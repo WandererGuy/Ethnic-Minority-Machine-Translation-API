@@ -77,7 +77,6 @@ def build_decoder(opt, embeddings):
                else opt.decoder_type
     return str2dec[dec_type].from_opt(opt, embeddings)
 
-
 def load_test_model(opt, model_path=None):
     import torch
     from onmt.inputters.text_dataset import TextMultiField
@@ -89,6 +88,7 @@ def load_test_model(opt, model_path=None):
         model_path = opt.models[0]
     checkpoint = torch.load(model_path,
                             map_location=lambda storage, loc: storage, weights_only=False)
+
 
     model_opt = ArgumentParser.ckpt_model_opts(checkpoint['opt'])
     ArgumentParser.update_model_opts(model_opt)

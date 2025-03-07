@@ -7,52 +7,25 @@ Experiment more (no bpe tokenize) -> Khmer to English -> train_acc : 90%, val_ac
 future solution : Khmer -> English -> Vietnamese (english to vietnam using MTeT repo)
 
 converge at epoch 120k-140k
+# medium post
+https://medium.com/@manhtech264/neural-machine-translation-between-any-2-languages-part-1-74980f50e3a6
 
 # prepare 
 make a folder ./data
-put file ./data/target_source.txt 
-# usage: run this bash file in order
+put training target source file into ./data/target_source.txt 
+
+
+# prepare env:
+## prepare sentencepiece tokenizer (build for env 2)
+```
+bash 0_build_spm.sh
+```
+## usage: run this bash file in order
+u should run manually command in this bash file 
 ```
 bash create_env.sh
 ```
-```
-bash run-all-no-bpe.sh
-```
-```
-bash 8_translate-no-bpe.sh
-```
-
-
-# can skip this part (it explain what i extra did to get the code run)
-(dont need to read this anymore) prepare env:
-- env_1 (before train)
-```
-pip install khmer-nltk
-pip install underthesea
-pip install nltk
-pip install numpy==1.25.0
-```
-
-- env_2(train)
-dont need anymore cause I integrate into source code already: (build OpenMNT)
-```
-!wget https://github.com/OpenNMT/OpenNMT-py/archive/refs/tags/2.3.0.tar.gz
-!tar -zxvf 2.3.0.tar.gz
-!mv OpenNMT-py-2.3.0 OpenNMT-py
-```
-to use CLI command for OpenNMT-py
-```
-%cd OpenNMT-py
-!pip install -e .
-```
-dont need this:
-```
-!pip install OpenNMT-py==2.3.0
-```
-
-
-
-- things I change w.r.t original OpenNMT:
+### things I change w.r.t original OpenNMT: (only do this if encounter bug when translate or training)
     to enable training from pretrain<br>
     in OpenNMT-py/onmt/models/model_saver.py change (to bypass security safe)
 
@@ -89,5 +62,41 @@ dont need this:
             model_path = opt.models[0]
         checkpoint = torch.load(model_path,
                                 map_location=lambda storage, loc: storage, weights_only=False)
+                                
+        model_opt = ArgumentParser.ckpt_model_opts(checkpoint['opt'])
+        ArgumentParser.update_model_opts(model_opt)
+        ArgumentParser.validate_model_opts(model_opt)
+        fields = checkpoint['vocab']
+
+        # Avoid functionality on inference
+        model_opt.update_vocab = False
+
+        model = build_base_model(model_opt, fields, use_gpu(opt), checkpoint,
+                                opt.gpu)
+        if opt.fp32:
+            model.float()
+        elif opt.int8:
+            if opt.gpu >= 0:
+                raise ValueError(
+                    "Dynamic 8-bit quantization is not supported on GPU")
+            torch.quantization.quantize_dynamic(model, inplace=True)
+        model.eval()
+        model.generator.eval()
+        return fields, model, model_opt
+
     ```
 
+
+## training
+u should run manually command in this bash file for any raising bugs
+```
+bash run-all-no-bpe.sh
+```
+
+## translate (inference) for 1000 first lines in src-test-token.txt
+```
+8_create_sample_translate.py
+9_0_translate-no-bpe.sh
+9_1_refine_translate.py
+```
+see result in ./data new file call fake...

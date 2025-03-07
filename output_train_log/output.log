@@ -1,0 +1,112 @@
+[2025-03-07 16:11:48,093 INFO] Missing transforms field for corpus_1 data, set to default: [].
+[2025-03-07 16:11:48,093 WARNING] Corpus corpus_1's weight should be given. We default it to 1 for you.
+[2025-03-07 16:11:48,093 INFO] Missing transforms field for valid data, set to default: [].
+[2025-03-07 16:11:48,093 INFO] Parsed 2 corpora from -data.
+[2025-03-07 16:11:48,093 INFO] Get special vocabs from Transforms: {'src': set(), 'tgt': set()}.
+[2025-03-07 16:11:48,093 INFO] Loading vocab from text file...
+[2025-03-07 16:11:48,093 INFO] Loading src vocabulary from models/2025-03-07-16-11/example.vocab.src
+[2025-03-07 16:11:48,096 INFO] Loaded src vocab has 3706 tokens.
+[2025-03-07 16:11:48,097 INFO] Loading tgt vocabulary from models/2025-03-07-16-11/example.vocab.tgt
+[2025-03-07 16:11:48,098 INFO] Loaded tgt vocab has 826 tokens.
+[2025-03-07 16:11:48,098 INFO] Building fields with vocab in counters...
+[2025-03-07 16:11:48,099 INFO]  * tgt vocab size: 830.
+[2025-03-07 16:11:48,102 INFO]  * src vocab size: 3708.
+[2025-03-07 16:11:48,102 INFO]  * src vocab size = 3708
+[2025-03-07 16:11:48,102 INFO]  * tgt vocab size = 830
+[2025-03-07 16:11:48,146 INFO] Building model...
+[2025-03-07 16:11:48,709 INFO] NMTModel(
+  (encoder): TransformerEncoder(
+    (embeddings): Embeddings(
+      (make_embedding): Sequential(
+        (emb_luts): Elementwise(
+          (0): Embedding(3708, 512, padding_idx=1)
+        )
+        (pe): PositionalEncoding(
+          (dropout): Dropout(p=0.3, inplace=False)
+        )
+      )
+    )
+    (transformer): ModuleList(
+      (0-5): 6 x TransformerEncoderLayer(
+        (self_attn): MultiHeadedAttention(
+          (linear_keys): Linear(in_features=512, out_features=512, bias=True)
+          (linear_values): Linear(in_features=512, out_features=512, bias=True)
+          (linear_query): Linear(in_features=512, out_features=512, bias=True)
+          (softmax): Softmax(dim=-1)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (final_linear): Linear(in_features=512, out_features=512, bias=True)
+        )
+        (feed_forward): PositionwiseFeedForward(
+          (w_1): Linear(in_features=512, out_features=2048, bias=True)
+          (w_2): Linear(in_features=2048, out_features=512, bias=True)
+          (layer_norm): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+          (dropout_1): Dropout(p=0.3, inplace=False)
+          (dropout_2): Dropout(p=0.3, inplace=False)
+        )
+        (layer_norm): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+        (dropout): Dropout(p=0.3, inplace=False)
+      )
+    )
+    (layer_norm): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+  )
+  (decoder): TransformerDecoder(
+    (embeddings): Embeddings(
+      (make_embedding): Sequential(
+        (emb_luts): Elementwise(
+          (0): Embedding(830, 512, padding_idx=1)
+        )
+        (pe): PositionalEncoding(
+          (dropout): Dropout(p=0.3, inplace=False)
+        )
+      )
+    )
+    (layer_norm): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+    (transformer_layers): ModuleList(
+      (0-5): 6 x TransformerDecoderLayer(
+        (self_attn): MultiHeadedAttention(
+          (linear_keys): Linear(in_features=512, out_features=512, bias=True)
+          (linear_values): Linear(in_features=512, out_features=512, bias=True)
+          (linear_query): Linear(in_features=512, out_features=512, bias=True)
+          (softmax): Softmax(dim=-1)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (final_linear): Linear(in_features=512, out_features=512, bias=True)
+        )
+        (feed_forward): PositionwiseFeedForward(
+          (w_1): Linear(in_features=512, out_features=2048, bias=True)
+          (w_2): Linear(in_features=2048, out_features=512, bias=True)
+          (layer_norm): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+          (dropout_1): Dropout(p=0.3, inplace=False)
+          (dropout_2): Dropout(p=0.3, inplace=False)
+        )
+        (layer_norm_1): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+        (drop): Dropout(p=0.3, inplace=False)
+        (context_attn): MultiHeadedAttention(
+          (linear_keys): Linear(in_features=512, out_features=512, bias=True)
+          (linear_values): Linear(in_features=512, out_features=512, bias=True)
+          (linear_query): Linear(in_features=512, out_features=512, bias=True)
+          (softmax): Softmax(dim=-1)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (final_linear): Linear(in_features=512, out_features=512, bias=True)
+        )
+        (layer_norm_2): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+      )
+    )
+  )
+  (generator): Sequential(
+    (0): Linear(in_features=512, out_features=830, bias=True)
+    (1): Cast()
+    (2): LogSoftmax(dim=-1)
+  )
+)
+[2025-03-07 16:11:48,711 INFO] encoder: 20813824
+[2025-03-07 16:11:48,711 INFO] decoder: 26075966
+[2025-03-07 16:11:48,711 INFO] * number of parameters: 46889790
+[2025-03-07 16:11:49,505 INFO] Starting training on GPU: [0]
+[2025-03-07 16:11:49,505 INFO] Start training loop and validate every 1000 steps...
+[2025-03-07 16:11:49,505 INFO] corpus_1's transforms: TransformPipe()
+[2025-03-07 16:11:49,505 INFO] Weighted corpora loaded so far:
+			* corpus_1: 1
+[2025-03-07 16:11:58,491 INFO] Step 50/130000; acc:   7.19; ppl: 21926.96; xent: 10.00; lr: 1.00000; 7281/16509 tok/s;      9 sec;
+[2025-03-07 16:12:06,577 INFO] Step 100/130000; acc:  10.14; ppl: 1048.95; xent: 6.96; lr: 1.00000; 7502/17131 tok/s;     17 sec;
+[2025-03-07 16:12:17,584 INFO] Step 150/130000; acc:  15.30; ppl: 219.55; xent: 5.39; lr: 1.00000; 5639/12743 tok/s;     28 sec;
+[2025-03-07 16:12:25,447 INFO] Step 200/130000; acc:  17.66; ppl: 138.32; xent: 4.93; lr: 1.00000; 7506/17930 tok/s;     36 sec;

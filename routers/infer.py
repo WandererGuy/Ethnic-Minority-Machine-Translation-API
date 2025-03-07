@@ -7,6 +7,7 @@ from routers.model import MyHTTPException, \
 
 import os 
 import uuid
+import nltk
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 from nltk import word_tokenize
 import subprocess
@@ -21,6 +22,10 @@ parent_dir = os.path.dirname(current_dir)
 static_folder = os.path.join(parent_dir, "static")
 translate_output_folder = os.path.join(static_folder, "translate_output")
 os.makedirs(translate_output_folder, exist_ok=True)
+ckpt_opennmt_folder = os.path.join(parent_dir, "checkpoint_OpenNMT")
+os.makedirs(ckpt_opennmt_folder, exist_ok=True)
+random_folder = os.path.join(parent_dir, "checkpoint_tokenizer")
+os.makedirs(random_folder, exist_ok=True)
 
 
 
@@ -75,6 +80,8 @@ def detokenize_file(src_path, output_path):
         lines = f.readlines()
         for line in lines:
             line = line.strip()
+            line = line.replace(" ", "")
+            line = line.replace("▁", " ")
             output.append(detokenizer.detokenize(word_tokenize(line)))
 
     with open(output_path, 'w') as f:
@@ -94,53 +101,82 @@ def handle_response(response):
     else:
         raise MyHTTPException(status_code=500, message = f"send Request to another Backend, failed with status code {response.status_code}")
     
-def send_request_tokenize(file_to_tokenize_path: str, 
-                          lang_source: str,
-                          trained_tokenizer_name: str 
+def send_request_tokenize(file_to_translate: str, 
+                          train_tokenizer: str 
                           ):
     host_ip, port_num = load_main_tokenize_config()
-    url_tokenize = f"http://{host_ip}:{port_num}/tokenize-language"
+    url_tokenize = f"http://{host_ip}:{port_num}/tokenize-file"
 
-    payload = {"file_to_tokenize_path" : file_to_tokenize_path, 
-               "lang_source" : lang_source, 
-               "trained_tokenizer_name" : trained_tokenizer_name
+    payload = {"file_to_tokenize_path" : file_to_translate, 
+               "train_tokenizer" : train_tokenizer
     }
     files=[
     ]
     headers = {}
     response = requests.request("POST", url_tokenize, headers=headers, data=payload, files=files)
     return response
+import time 
+def running_python(command):
+    print ("************************************")
+    print (" ".join(command))
+    # Running the subprocess with the provided command
+    subprocess.run(command, text=True)
+    time.sleep(4)
+
+import shutil
+@router.post("/train-opennmt")
+async def train_opennmt(
+    target_source_file: str = Form(...)
+    ):
+    data_folder = os.path.join(parent_dir, "data")
+    shutil.copy(target_source_file, data_folder)
+    os.rename(os.path.join(data_folder, target_source_file), os.path.join(data_folder, "target_source.txt"))
+    time.sleep(5)
+    command = ["python", "START_train.py"]
+    running_python(command)
+    time.sleep(5)
+    shutil.copy("models/run2/model_step_130000.pt", os.path.join(parent_dir, "checkpoint_OpenNMT"))
+    return reply_success(message = "Done", result=None)
+
+@router.get("/get-checkpoint-opennmt-path")
+async def get_checkpoint_opennmt_path():
+    filenames = os.listdir(ckpt_opennmt_folder)
+    filenames = [os.path.join(ckpt_opennmt_folder, name) for name in filenames]
+    return reply_success(message = "Done", result=filenames)
+
 
 @router.post("/translate-language/")
 async def translate_language(
-    file_to_translate_path: str = Form(...),
-    lang_source: str = Form(...),
-    model_checkpoint_name : str = Form(...),
-    trained_tokenizer_name: str = Form(...)
+    file_to_translate: str = Form(...),
+    # lang_source: str = Form(...),
+    model_checkpoint_path : str = Form(...),
+    source_train_tokenizer: str = Form(...)
 ):
-    checkpoint_folder = "lang_checkpoints"
+    checkpoint_folder = "checkpoint_OpenNMT"
+    os.makedirs(checkpoint_folder, exist_ok=True)
     host_ip, port_num = load_main_config()
 
-    allow_lang = ["khmer"]
-    if lang_source not in allow_lang:
-        raise MyHTTPException(status_code=400, message="Language not supported")
+    # allow_lang = ["khmer", "ede"]
+    # if lang_source not in allow_lang:
+    #     raise MyHTTPException(status_code=400, message="Language not supported")
 
-    res = send_request_tokenize(file_to_tokenize_path = file_to_translate_path, 
-                            lang_source = lang_source,
-                            trained_tokenizer_name = trained_tokenizer_name
+    res = send_request_tokenize(file_to_translate = file_to_translate, 
+                            train_tokenizer = source_train_tokenizer
                             )
     res_json = handle_response(res)
-    tokenized_file_path = res_json["result"]
+    tokenized_file = res_json["result"]
     output_filepath = os.path.join(translate_output_folder, str(uuid.uuid4()) + ".txt")
 
     translate_file(
-        model_path=os.path.join(checkpoint_folder, model_checkpoint_name),
-        src_path=tokenized_file_path,
+        model_path=model_checkpoint_path,
+        src_path=tokenized_file,
         output_path=output_filepath)
-
+    detokenized_output_filepath = output_filepath.replace(".txt", "_detokenized.txt")
     detokenize_file(src_path=output_filepath, 
-                    output_path=output_filepath)
-    url = f"http://{host_ip}:{port_num}/static/{os.path.basename(translate_output_folder)}/{os.path.basename(output_filepath)}"
+                    output_path=detokenized_output_filepath)
+    url = f"http://{host_ip}:{port_num}/static/{os.path.basename(translate_output_folder)}/{os.path.basename(detokenized_output_filepath)}"
     return reply_success(
         message="Translation success",
         result=url)
+
+

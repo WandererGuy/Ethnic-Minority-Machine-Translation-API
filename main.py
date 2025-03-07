@@ -46,6 +46,10 @@ async def root():
 def main():
     # change_ip_main()
     sleep(2)
+    import shutil
+    if os.path.exists("OpenNMT-py/onmt/model_builder.py"):
+        os.remove("OpenNMT-py/onmt/model_builder.py")
+    shutil.copy("OpenNMT_replace/model_builder.py", "OpenNMT-py/onmt")
     print('INITIALIZING FASTAPI SERVER')
     if empty_to_false(production) == False: 
         uvicorn.run(f"{script_name}:app", host=host_ip, port=int(port_num), reload=True, workers=1)
