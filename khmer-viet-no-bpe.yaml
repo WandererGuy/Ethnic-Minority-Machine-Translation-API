@@ -1,10 +1,10 @@
 # data-no-bpe.yaml
 
     ## Where the samples will be written
-    save_data: data/2025-03-07-16-11/example
+    save_data: data/run2/example
     ## Where the vocab(s) will be written
-    src_vocab: data/2025-03-07-16-11/example.vocab.src
-    tgt_vocab: data/2025-03-07-16-11/example.vocab.tgt
+    src_vocab: data/run2/example.vocab.src
+    tgt_vocab: data/run2/example.vocab.tgt
     # Prevent overwriting existing files in the folder
     overwrite: True
 
@@ -18,15 +18,15 @@
             path_tgt: data/tgt-val-token.txt
 
     # Vocabulary files that were just created
-    src_vocab: models/2025-03-07-16-11/example.vocab.src
-    tgt_vocab: models/2025-03-07-16-11/example.vocab.tgt
+    src_vocab: models/run2/example.vocab.src
+    tgt_vocab: models/run2/example.vocab.tgt
 
     # Train on a single GPU
     world_size: 1
     gpu_ranks: [0]
 
     # Where to save the checkpoints
-    save_model: models/2025-03-07-16-11/model
+    save_model: models/run2/model
     save_checkpoint_steps: 10000
     train_steps: 130000
     valid_steps: 1000

@@ -110,3 +110,116 @@
 [2025-03-07 16:12:06,577 INFO] Step 100/130000; acc:  10.14; ppl: 1048.95; xent: 6.96; lr: 1.00000; 7502/17131 tok/s;     17 sec;
 [2025-03-07 16:12:17,584 INFO] Step 150/130000; acc:  15.30; ppl: 219.55; xent: 5.39; lr: 1.00000; 5639/12743 tok/s;     28 sec;
 [2025-03-07 16:12:25,447 INFO] Step 200/130000; acc:  17.66; ppl: 138.32; xent: 4.93; lr: 1.00000; 7506/17930 tok/s;     36 sec;
+[2025-03-10 08:34:06,364 INFO] Missing transforms field for corpus_1 data, set to default: [].
+[2025-03-10 08:34:06,364 WARNING] Corpus corpus_1's weight should be given. We default it to 1 for you.
+[2025-03-10 08:34:06,364 INFO] Missing transforms field for valid data, set to default: [].
+[2025-03-10 08:34:06,364 INFO] Parsed 2 corpora from -data.
+[2025-03-10 08:34:06,364 INFO] Get special vocabs from Transforms: {'src': set(), 'tgt': set()}.
+[2025-03-10 08:34:06,364 INFO] Loading vocab from text file...
+[2025-03-10 08:34:06,365 INFO] Loading src vocabulary from models/run2/example.vocab.src
+[2025-03-10 08:34:06,369 INFO] Loaded src vocab has 3706 tokens.
+[2025-03-10 08:34:06,370 INFO] Loading tgt vocabulary from models/run2/example.vocab.tgt
+[2025-03-10 08:34:06,371 INFO] Loaded tgt vocab has 826 tokens.
+[2025-03-10 08:34:06,371 INFO] Building fields with vocab in counters...
+[2025-03-10 08:34:06,373 INFO]  * tgt vocab size: 830.
+[2025-03-10 08:34:06,376 INFO]  * src vocab size: 3708.
+[2025-03-10 08:34:06,376 INFO]  * src vocab size = 3708
+[2025-03-10 08:34:06,376 INFO]  * tgt vocab size = 830
+[2025-03-10 08:34:06,437 INFO] Building model...
+[2025-03-10 08:34:07,071 INFO] NMTModel(
+  (encoder): TransformerEncoder(
+    (embeddings): Embeddings(
+      (make_embedding): Sequential(
+        (emb_luts): Elementwise(
+          (0): Embedding(3708, 512, padding_idx=1)
+        )
+        (pe): PositionalEncoding(
+          (dropout): Dropout(p=0.3, inplace=False)
+        )
+      )
+    )
+    (transformer): ModuleList(
+      (0-5): 6 x TransformerEncoderLayer(
+        (self_attn): MultiHeadedAttention(
+          (linear_keys): Linear(in_features=512, out_features=512, bias=True)
+          (linear_values): Linear(in_features=512, out_features=512, bias=True)
+          (linear_query): Linear(in_features=512, out_features=512, bias=True)
+          (softmax): Softmax(dim=-1)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (final_linear): Linear(in_features=512, out_features=512, bias=True)
+        )
+        (feed_forward): PositionwiseFeedForward(
+          (w_1): Linear(in_features=512, out_features=2048, bias=True)
+          (w_2): Linear(in_features=2048, out_features=512, bias=True)
+          (layer_norm): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+          (dropout_1): Dropout(p=0.3, inplace=False)
+          (dropout_2): Dropout(p=0.3, inplace=False)
+        )
+        (layer_norm): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+        (dropout): Dropout(p=0.3, inplace=False)
+      )
+    )
+    (layer_norm): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+  )
+  (decoder): TransformerDecoder(
+    (embeddings): Embeddings(
+      (make_embedding): Sequential(
+        (emb_luts): Elementwise(
+          (0): Embedding(830, 512, padding_idx=1)
+        )
+        (pe): PositionalEncoding(
+          (dropout): Dropout(p=0.3, inplace=False)
+        )
+      )
+    )
+    (layer_norm): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+    (transformer_layers): ModuleList(
+      (0-5): 6 x TransformerDecoderLayer(
+        (self_attn): MultiHeadedAttention(
+          (linear_keys): Linear(in_features=512, out_features=512, bias=True)
+          (linear_values): Linear(in_features=512, out_features=512, bias=True)
+          (linear_query): Linear(in_features=512, out_features=512, bias=True)
+          (softmax): Softmax(dim=-1)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (final_linear): Linear(in_features=512, out_features=512, bias=True)
+        )
+        (feed_forward): PositionwiseFeedForward(
+          (w_1): Linear(in_features=512, out_features=2048, bias=True)
+          (w_2): Linear(in_features=2048, out_features=512, bias=True)
+          (layer_norm): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+          (dropout_1): Dropout(p=0.3, inplace=False)
+          (dropout_2): Dropout(p=0.3, inplace=False)
+        )
+        (layer_norm_1): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+        (drop): Dropout(p=0.3, inplace=False)
+        (context_attn): MultiHeadedAttention(
+          (linear_keys): Linear(in_features=512, out_features=512, bias=True)
+          (linear_values): Linear(in_features=512, out_features=512, bias=True)
+          (linear_query): Linear(in_features=512, out_features=512, bias=True)
+          (softmax): Softmax(dim=-1)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (final_linear): Linear(in_features=512, out_features=512, bias=True)
+        )
+        (layer_norm_2): LayerNorm((512,), eps=1e-06, elementwise_affine=True)
+      )
+    )
+  )
+  (generator): Sequential(
+    (0): Linear(in_features=512, out_features=830, bias=True)
+    (1): Cast()
+    (2): LogSoftmax(dim=-1)
+  )
+)
+[2025-03-10 08:34:07,073 INFO] encoder: 20813824
+[2025-03-10 08:34:07,073 INFO] decoder: 26075966
+[2025-03-10 08:34:07,073 INFO] * number of parameters: 46889790
+[2025-03-10 08:34:08,063 INFO] Starting training on GPU: [0]
+[2025-03-10 08:34:08,064 INFO] Start training loop and validate every 1000 steps...
+[2025-03-10 08:34:08,064 INFO] corpus_1's transforms: TransformPipe()
+[2025-03-10 08:34:08,064 INFO] Weighted corpora loaded so far:
+			* corpus_1: 1
+[2025-03-10 08:34:16,893 INFO] Step 50/130000; acc:   6.91; ppl: 181132.52; xent: 12.11; lr: 1.00000; 7193/16403 tok/s;      9 sec;
+[2025-03-10 08:34:25,532 INFO] Step 100/130000; acc:   8.69; ppl: 658.32; xent: 6.49; lr: 1.00000; 7343/16510 tok/s;     17 sec;
+[2025-03-10 08:34:34,003 INFO] Step 150/130000; acc:  12.97; ppl: 277.03; xent: 5.62; lr: 1.00000; 7147/16356 tok/s;     26 sec;
+[2025-03-10 08:34:42,513 INFO] Step 200/130000; acc:  17.50; ppl: 124.87; xent: 4.83; lr: 1.00000; 7067/16712 tok/s;     34 sec;
+[2025-03-10 08:34:51,069 INFO] Step 250/130000; acc:  20.16; ppl: 177.18; xent: 5.18; lr: 1.00000; 7236/17625 tok/s;     43 sec;

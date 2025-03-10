@@ -23,6 +23,8 @@ os.makedirs(ckpt_tokenizer_folder, exist_ok=True)
 split_folder = os.path.join(static_folder,"split_target_source")
 os.makedirs(split_folder, exist_ok=True)
 
+
+
 def split_target_source(target_source_file, output_src_file, output_target_file):
     path = target_source_file
     with open (path, "r") as f:
@@ -56,10 +58,10 @@ def split_target_source(target_source_file, output_src_file, output_target_file)
             f.write("\n")
 
 
-def tokenize_file_infer(filepath, train_tokenizer):
+def tokenize_file_infer(filepath, source_checkpoint_tokenizer_path):
     tokenized_for_infer_file = os.path.join(tokenized_for_infer_folder , str(uuid.uuid4()) + ".txt")
     command = ["spm_encode",
-                f"--model={train_tokenizer}",
+                f"--model={source_checkpoint_tokenizer_path}",
                 "--input", filepath, 
                 "--output", tokenized_for_infer_file]
     print (" ".join(command))
@@ -87,11 +89,19 @@ def train_init(train_file, train_tokenizer_name):
         else:
             break
     os.rename("source.model", train_tokenizer_name + ".model")
+    save_path = os.path.join(ckpt_tokenizer_folder, train_tokenizer_name + ".model")
+    if os.path.exists(save_path):
+        os.remove(save_path)
+    time.sleep(3)
     shutil.move(train_tokenizer_name + ".model", ckpt_tokenizer_folder)
+    return save_path
 
 @router.post("/split-target-source-file")
 async def split_target_source_file(
-    target_source_file: str = Form(...)):
+    target_source_file: str = Form(...)
+    ):
+    if not os.path.exists(target_source_file):
+        raise MyHTTPException(status_code=404, message = f"{target_source_file} not found")
     output_src_file = os.path.join(split_folder, str(uuid.uuid4()) + ".txt")
     output_target_file = os.path.join(split_folder, str(uuid.uuid4()) + ".txt")
     split_target_source(target_source_file, output_src_file, output_target_file)
@@ -103,8 +113,10 @@ async def train_tokenizer(
     train_file: str = Form(...),
     train_tokenizer_name: str = Form(...)
     ):
-    train_init(train_file, train_tokenizer_name)
-    return reply_success(message = "Done", result=None)
+    if not os.path.exists(train_file):
+        raise MyHTTPException(status_code=404, message = f"{train_file} not found")
+    save_path = train_init(train_file, train_tokenizer_name)
+    return reply_success(message = "Done, model saved in ", result=save_path)
 
 @router.get("/get-checkpoint-tokenizer-path")
 async def get_checkpoint_tokenizer_path():
@@ -116,9 +128,13 @@ async def get_checkpoint_tokenizer_path():
 @router.post("/tokenize-file")
 async def tokenize_file(
     file_to_tokenize_path: str = Form(...),
-    train_tokenizer: str = Form(...)
+    source_checkpoint_tokenizer_path: str = Form(...)
     ):
+    if not os.path.exists(file_to_tokenize_path):
+        raise MyHTTPException(status_code=404, message = f"{file_to_tokenize_path} not found")
+    if not os.path.exists(source_checkpoint_tokenizer_path):
+        raise MyHTTPException(status_code=404, message = f"{source_checkpoint_tokenizer_path} not found")
     tokenized_for_infer_file = tokenize_file_infer(
                   filepath = file_to_tokenize_path, 
-                  train_tokenizer=train_tokenizer)    
+                  source_checkpoint_tokenizer_path=source_checkpoint_tokenizer_path)    
     return reply_success(message = "Done", result=tokenized_for_infer_file)
