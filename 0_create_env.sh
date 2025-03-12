@@ -14,7 +14,7 @@ conda activate $second_anaconda_env
 # pip install underthesea
 # pip install nltk
 # pip install numpy==1.25.0
-wget https://github.com/OpenNMT/OpenNMT-py/archive/refs/tags/2.3.0.tar.gz
+# wget https://github.com/OpenNMT/OpenNMT-py/archive/refs/tags/2.3.0.tar.gz
 tar -zxvf 2.3.0.tar.gz
 mv OpenNMT-py-2.3.0 OpenNMT-py
 cd OpenNMT-py
