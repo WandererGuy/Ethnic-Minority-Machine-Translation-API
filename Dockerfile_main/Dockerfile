@@ -43,8 +43,8 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 EXPOSE 5021 
 CMD ["python", "main.py"]
 
-# docker build  --no-cache -t myapp .    
-# docker run -it --gpus all -p 5021:5021 myapp
+# docker build  --no-cache -t nmt_main .    
+# docker run -it --gpus all -p 5021:5021 nmt_main
 
 # # Update the package list and install dependencies
 # RUN apt-get update && apt-get install -y \

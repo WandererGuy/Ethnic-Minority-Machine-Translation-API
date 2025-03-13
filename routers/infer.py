@@ -266,10 +266,13 @@ async def translate_language(
                     output_path=detokenized_output_filepath, 
                     file_to_translate = refined_file_to_translate, 
                     mtet_host_ip = host_ip)
-    with open(output_filepath, "r") as file:
+    t = rf"{os.path.basename(translate_output_folder)}/{os.path.basename(detokenized_output_filepath)}"
+    
+    t_path = os.path.join(static_folder, os.path.basename(translate_output_folder), os.path.basename(detokenized_output_filepath))
+    with open(t_path, "r") as file:
         content = file.read()
 
-    # url = f"http://127.0.0.1:{port_num}/static/{os.path.basename(translate_output_folder)}/{os.path.basename(detokenized_output_filepath)}"
+    # url = f"http://127.0.0.1:{port_num}/static/{t}"
     return reply_success(
         message="Translation success",
         result=content)

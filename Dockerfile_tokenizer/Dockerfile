@@ -43,8 +43,8 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 EXPOSE 5022
 CMD ["python", "main_tokenizer.py"]
 
-# docker build  --no-cache -t myapp_tokenizer .    
-# docker run -it --gpus all -p 5022:5022 myapp_tokenizer
+# docker build  --no-cache -t nmt_tokenizer .    
+# docker run -it --gpus all -p 5022:5022 nmt_tokenizer
 
 # # Update the package list and install dependencies
 # RUN apt-get update && apt-get install -y \
