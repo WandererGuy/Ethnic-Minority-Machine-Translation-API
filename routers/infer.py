@@ -254,23 +254,22 @@ def calculate_num_lines(file_path):
         lines = f.readlines()
         num_lines = len(lines)
         return num_lines
-from fastapi import UploadFile, File
 
 @router.post("/translate-language/")
 async def translate_language(
     # file_to_translate: str = Form(...),
     # lang_source: str = Form(...),
-    file_to_translate: UploadFile = File(...),
+    file_to_translate_content: str = Form(...),
     model_checkpoint_path : str = Form(...),
     source_checkpoint_tokenizer_path: str = Form(...)
 ):
-    file_contents = await file_to_translate.read()
-    content_str = file_contents.decode('utf-8')  # Assuming the file is UTF-8 encoded
+    # file_contents = await file_to_translate.read()
+    # content_str = file_contents.decode('utf-8')  # Assuming the file is UTF-8 encoded
     file_to_translate_folder = os.path.join(static_folder, "file_to_translate")
     os.makedirs(file_to_translate_folder, exist_ok=True)
     new_save_path = os.path.join(file_to_translate_folder, str(uuid.uuid4()) + ".txt")  # Adjust the path as needed
     with open(new_save_path, "w", encoding='utf-8') as new_file:
-        new_file.write(content_str)
+        new_file.write(file_to_translate_content)
     file_to_translate = new_save_path
     refined_file_to_translate = refine_file_to_translate_func(file_to_translate)
     print ("****** original file after refined ******")
