@@ -10,10 +10,18 @@ converge at epoch 120k-140k
 # medium post
 https://medium.com/@manhtech264/neural-machine-translation-between-any-2-languages-part-1-74980f50e3a6
 
+# dockerfile
+U can run a demo use Docker by simple build image with Dockerfile then run the built image 
+from the repo
+```
+docker build -t myapp .    
+docker run -it --name myapp_container --gpus all -p 3000:4000 myapp
+```
+
+# EXPLAIN THE DEMO DOCKERFILE
 # prepare 
 make a folder ./data
 put training target source file into ./data/target_source.txt 
-
 
 # prepare env:
 ## prepare sentencepiece tokenizer (build for env 2)

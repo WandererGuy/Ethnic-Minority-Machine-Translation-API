@@ -73,7 +73,7 @@ def translate_file(model_path, src_path, output_path):
         print("Error:", process.stderr)
     print ("end process ....")
 
-def detokenize_file(src_path, output_path, file_to_translate):
+def detokenize_file(src_path, output_path, file_to_translate, mtet_host_ip):
     vi_output = []
     en_output = []
     with open (file_to_translate, 'r') as f:
@@ -88,7 +88,7 @@ def detokenize_file(src_path, output_path, file_to_translate):
             en_output_line = detokenizer.detokenize(word_tokenize(line))
             en_output.append(en_output_line)
             # output.append(output_line)
-            vi_output_line = translate_en(en_output_line)
+            vi_output_line = translate_en(en_output_line, mtet_host_ip)
             vi_output.append(vi_output_line)
 
     with open(output_path, 'w') as f:
@@ -147,8 +147,8 @@ def running_python(command):
 
 
 import requests
-def translate_en(input_text):
-    url = "http://192.168.1.5:4013/translate_en"
+def translate_en(input_text, mtet_host_ip):
+    url = f"http://{mtet_host_ip}:4013/translate_en"
 
     payload = {'language': 'en',
     'inputs': input_text}
@@ -264,11 +264,14 @@ async def translate_language(
 
     detokenize_file(src_path=output_filepath, 
                     output_path=detokenized_output_filepath, 
-                    file_to_translate = refined_file_to_translate)
+                    file_to_translate = refined_file_to_translate, 
+                    mtet_host_ip = host_ip)
+    with open(output_filepath, "r") as file:
+        content = file.read()
 
-    url = f"http://127.0.0.1:{port_num}/static/{os.path.basename(translate_output_folder)}/{os.path.basename(detokenized_output_filepath)}"
+    # url = f"http://127.0.0.1:{port_num}/static/{os.path.basename(translate_output_folder)}/{os.path.basename(detokenized_output_filepath)}"
     return reply_success(
         message="Translation success",
-        result=url)
+        result=content)
 
 
