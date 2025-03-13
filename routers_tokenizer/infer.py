@@ -58,16 +58,16 @@ def split_target_source(target_source_file, output_src_file, output_target_file)
             f.write("\n")
 
 
-def tokenize_file_infer(filepath, source_checkpoint_tokenizer_path):
-    tokenized_for_infer_file = os.path.join(tokenized_for_infer_folder , str(uuid.uuid4()) + ".txt")
-    command = ["spm_encode",
-                f"--model={source_checkpoint_tokenizer_path}",
-                "--input", filepath, 
-                "--output", tokenized_for_infer_file]
-    print (" ".join(command))
-    # Running the subprocess with the provided command
-    result = subprocess.run(command, capture_output=True, text=True)
-    return tokenized_for_infer_file
+# def tokenize_file_infer(filepath, source_checkpoint_tokenizer_path):
+#     tokenized_for_infer_file = os.path.join(tokenized_for_infer_folder , str(uuid.uuid4()) + ".txt")
+#     command = ["spm_encode",
+#                 f"--model={source_checkpoint_tokenizer_path}",
+#                 "--input", filepath, 
+#                 "--output", tokenized_for_infer_file]
+#     print (" ".join(command))
+#     # Running the subprocess with the provided command
+#     result = subprocess.run(command, capture_output=True, text=True)
+#     return tokenized_for_infer_file
 
 
 import shutil
@@ -125,16 +125,16 @@ async def get_checkpoint_tokenizer_path():
     return reply_success(message = "Done", result=filenames)
 
 
-@router.post("/tokenize-file")
-async def tokenize_file(
-    file_to_tokenize_path: str = Form(...),
-    source_checkpoint_tokenizer_path: str = Form(...)
-    ):
-    if not os.path.exists(file_to_tokenize_path):
-        raise MyHTTPException(status_code=404, message = f"{file_to_tokenize_path} not found")
-    if not os.path.exists(source_checkpoint_tokenizer_path):
-        raise MyHTTPException(status_code=404, message = f"{source_checkpoint_tokenizer_path} not found")
-    tokenized_for_infer_file = tokenize_file_infer(
-                  filepath = file_to_tokenize_path, 
-                  source_checkpoint_tokenizer_path=source_checkpoint_tokenizer_path)    
-    return reply_success(message = "Done", result=tokenized_for_infer_file)
+# @router.post("/tokenize-file")
+# async def tokenize_file(
+#     file_to_tokenize_path: str = Form(...),
+#     source_checkpoint_tokenizer_path: str = Form(...)
+#     ):
+#     if not os.path.exists(file_to_tokenize_path):
+#         raise MyHTTPException(status_code=404, message = f"{file_to_tokenize_path} not found")
+#     if not os.path.exists(source_checkpoint_tokenizer_path):
+#         raise MyHTTPException(status_code=404, message = f"{source_checkpoint_tokenizer_path} not found")
+#     tokenized_for_infer_file = tokenize_file_infer(
+#                   filepath = file_to_tokenize_path, 
+#                   source_checkpoint_tokenizer_path=source_checkpoint_tokenizer_path)    
+#     return reply_success(message = "Done", result=tokenized_for_infer_file)
