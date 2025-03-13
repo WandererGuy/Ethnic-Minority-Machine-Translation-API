@@ -39,6 +39,8 @@ os.makedirs(ckpt_tokenizer_folder, exist_ok=True)
 split_folder = os.path.join(static_folder,"split_target_source")
 os.makedirs(split_folder, exist_ok=True)
 
+import nltk
+nltk.download('punkt_tab')
 
 def load_main_config():
     config = configparser.ConfigParser()
