@@ -127,7 +127,7 @@ def send_request_tokenize(file_to_translate: str,
                           source_checkpoint_tokenizer_path: str 
                           ):
     host_ip, port_num = load_main_tokenize_config()
-    url_tokenize = f"http://{host_ip}:{port_num}/tokenize-file"
+    url_tokenize = f"http://127.0.0.1:{port_num}/tokenize-file"
 
     payload = {"file_to_tokenize_path" : file_to_translate, 
                "source_checkpoint_tokenizer_path" : source_checkpoint_tokenizer_path
