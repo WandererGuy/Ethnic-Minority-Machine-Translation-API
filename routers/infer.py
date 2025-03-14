@@ -40,6 +40,18 @@ os.makedirs(split_folder, exist_ok=True)
 import nltk
 nltk.download('punkt_tab')
 
+
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import torch 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print (device)
+
+mtet_model_name = "VietAI/envit5-translation"
+mtet_tokenizer = AutoTokenizer.from_pretrained(mtet_model_name)  
+mtet_model = AutoModelForSeq2SeqLM.from_pretrained(mtet_model_name)
+mtet_model.cuda()
+
+
 def load_main_config():
     config = configparser.ConfigParser()
     config.read(os.path.join(parent_dir,'config','config.ini'))
@@ -84,7 +96,7 @@ def translate_file(model_path, src_path, output_path):
         print("Error:", process.stderr)
     print ("end process ....")
 
-def detokenize_file(src_path, output_path, file_to_translate, mtet_host_ip):
+def detokenize_file(src_path, output_path, file_to_translate):
     vi_output = []
     en_output = []
     with open (file_to_translate, 'r') as f:
@@ -99,7 +111,8 @@ def detokenize_file(src_path, output_path, file_to_translate, mtet_host_ip):
             en_output_line = detokenizer.detokenize(word_tokenize(line))
             en_output.append(en_output_line)
             # output.append(output_line)
-            vi_output_line = translate_en(en_output_line, mtet_host_ip)
+            vi_output_line = mtet_translate_en(language = "en", inputs = en_output_line)
+            
             vi_output.append(vi_output_line)
 
     with open(output_path, 'w') as f:
@@ -179,24 +192,24 @@ def running_python(command):
     time.sleep(4)
 
 
-import requests
-def translate_en(input_text, mtet_host_ip):
-    url = f"http://{mtet_host_ip}:4013/translate_en"
-
-    payload = {'language': 'en',
-    'inputs': input_text}
-    files=[
-
-    ]
-    headers = {}
-
-    response = requests.request("POST", url, headers=headers, data=payload, files=files)
-    print ("************************************")
-    print(response.text)
-    json_response = response.json()
-    res = json_response["result"]
+# import requests
+# def translate_en(input_text, mtet_url):
     
-    return res
+
+#     payload = {'language': 'en',
+#     'inputs': input_text}
+#     files=[
+
+#     ]
+#     headers = {}
+
+#     response = requests.request("POST", mtet_url, headers=headers, data=payload, files=files)
+#     print ("************************************")
+#     print(response.text)
+#     json_response = response.json()
+#     res = json_response["result"]
+    
+#     return res
 
 refined_file_to_translate_folder = os.path.join(parent_dir, "static", "refined_file_to_translate")
 os.makedirs(refined_file_to_translate_folder, exist_ok=True)
@@ -219,8 +232,29 @@ def refine_file_to_translate_func(file_path):
                 f.write("\n")
     return refined_file_to_translate
 
-
-
+def mtet_translate_en(
+    language: str,
+    inputs: str
+):
+    # new = []
+    # with open(input_text_file, "r") as f:
+    #     input_text_lines = f.readlines()
+    #     for line in input_text_lines:
+    #         line = line.strip()
+            
+    #         if not line.endswith("."):
+    #             line += "."
+    #         new.append(line)
+    # input_text = " ".join(input_text_lines)
+    # inputs = input_text
+    if language == "en":
+        text = list("en: " + inputs)
+    else: 
+        return inputs
+    outputs = mtet_model.generate(mtet_tokenizer(inputs, return_tensors="pt", padding=True).input_ids.to('cuda'), max_length=512)
+    text = mtet_tokenizer.batch_decode(outputs, skip_special_tokens=True)
+    res = text[0].replace("vi: ", "")
+    return res
 
 import shutil
 @router.post("/train-opennmt")
@@ -304,8 +338,8 @@ async def translate_language(
 
     detokenize_file(src_path=output_filepath, 
                     output_path=detokenized_output_filepath, 
-                    file_to_translate = refined_file_to_translate, 
-                    mtet_host_ip = host_ip)
+                    file_to_translate = refined_file_to_translate
+                    )
     t = rf"{os.path.basename(translate_output_folder)}/{os.path.basename(detokenized_output_filepath)}"
     
     # t_path = os.path.join(static_folder, os.path.basename(translate_output_folder), os.path.basename(detokenized_output_filepath))
@@ -449,3 +483,5 @@ async def get_checkpoint_tokenizer_path():
 #                   filepath = file_to_tokenize_path, 
 #                   source_checkpoint_tokenizer_path=source_checkpoint_tokenizer_path)    
 #     return reply_success(message = "Done", result=tokenized_for_infer_file)
+
+

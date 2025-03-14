@@ -33,9 +33,11 @@ RUN pip install -e .
 WORKDIR /app/Ethnic-Minority-Machine-Translation-API
 RUN pip install nltk
 RUN pip install fastapi uvicorn pydantic python-multipart
+RUN pip install transformers
 RUN mkdir data
 RUN cp target_source/target_source_ede.txt data
 RUN mv data/target_source_ede.txt data/target_source.txt
+
 # Make the script executable
 # RUN chmod +x /app/script.sh
 RUN ln -s /usr/bin/python3 /usr/bin/python
