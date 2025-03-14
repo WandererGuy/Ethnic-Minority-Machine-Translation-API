@@ -40,6 +40,8 @@ RUN mv data/target_source_ede.txt data/target_source.txt
 # RUN chmod +x /app/script.sh
 RUN ln -s /usr/bin/python3 /usr/bin/python
 # port in config/config.ini
+RUN pip install gdown
+RUN gdown --folder https://drive.google.com/drive/folders/13i46pilo1kOMIAn-t2XKXnvCEDYuvOb9
 EXPOSE 5021 
 CMD ["python", "main.py"]
 

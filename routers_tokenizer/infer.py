@@ -18,7 +18,7 @@ os.makedirs(tokenized_folder, exist_ok=True)
 tokenized_for_infer_folder = os.path.join(static_folder,"tokenized_for_infer")
 os.makedirs(tokenized_for_infer_folder, exist_ok=True)
 
-ckpt_tokenizer_folder = os.path.join(parent_dir, "checkpoint_tokenizer")
+ckpt_tokenizer_folder = os.path.join(parent_dir, "checkpoints")
 os.makedirs(ckpt_tokenizer_folder, exist_ok=True)
 split_folder = os.path.join(static_folder,"split_target_source")
 os.makedirs(split_folder, exist_ok=True)

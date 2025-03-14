@@ -22,10 +22,8 @@ parent_dir = os.path.dirname(current_dir)
 static_folder = os.path.join(parent_dir, "static")
 translate_output_folder = os.path.join(static_folder, "translate_output")
 os.makedirs(translate_output_folder, exist_ok=True)
-ckpt_opennmt_folder = os.path.join(parent_dir, "checkpoint_OpenNMT")
+ckpt_opennmt_folder = os.path.join(parent_dir, "checkpoints")
 os.makedirs(ckpt_opennmt_folder, exist_ok=True)
-random_folder = os.path.join(parent_dir, "checkpoint_tokenizer")
-os.makedirs(random_folder, exist_ok=True)
 
 
 
@@ -34,7 +32,7 @@ os.makedirs(tokenized_folder, exist_ok=True)
 tokenized_for_infer_folder = os.path.join(static_folder,"tokenized_for_infer")
 os.makedirs(tokenized_for_infer_folder, exist_ok=True)
 
-ckpt_tokenizer_folder = os.path.join(parent_dir, "checkpoint_tokenizer")
+ckpt_tokenizer_folder = os.path.join(parent_dir, "checkpoints")
 os.makedirs(ckpt_tokenizer_folder, exist_ok=True)
 split_folder = os.path.join(static_folder,"split_target_source")
 os.makedirs(split_folder, exist_ok=True)
@@ -240,8 +238,8 @@ async def train_opennmt(
     command = ["python", "START_train.py"]
     running_python(command)
     time.sleep(5)
-    shutil.copy("models/run2/model_step_130000.pt", os.path.join(parent_dir, "checkpoint_OpenNMT"))
-    os.rename (os.path.join(parent_dir, "checkpoint_OpenNMT", "model_step_130000.pt"), os.path.join(parent_dir, "checkpoint_OpenNMT", f"{checkpoint_name_prefix}_model_step_130000.pt"))
+    shutil.copy("models/run2/model_step_130000.pt", os.path.join(parent_dir, "checkpoints"))
+    os.rename (os.path.join(parent_dir, "checkpoints", "model_step_130000.pt"), os.path.join(parent_dir, "checkpoints", f"{checkpoint_name_prefix}_model_step_130000.pt"))
     return reply_success(message = "Done and saved new checkpoint", result=None)
 
 @router.get("/get-checkpoint-opennmt-path")
@@ -276,7 +274,7 @@ async def translate_language(
     refined_file_to_translate = refine_file_to_translate_func(file_to_translate)
     print ("****** original file after refined ******")
     print (refined_file_to_translate)
-    checkpoint_folder = "checkpoint_OpenNMT"
+    checkpoint_folder = "checkpoints"
     os.makedirs(checkpoint_folder, exist_ok=True)
     host_ip, port_num = load_main_config()
 

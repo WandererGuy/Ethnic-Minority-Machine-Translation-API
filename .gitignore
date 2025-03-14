@@ -6,5 +6,7 @@ output_log
 data
 language_checkpoints
 /OpenNMT-py
-checkpoint_tokenizer
-checkpoint_OpenNMT
+checkpoints
+source.vocab
+target.vocab
+target.model
