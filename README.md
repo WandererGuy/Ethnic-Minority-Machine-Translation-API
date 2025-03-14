@@ -1,4 +1,4 @@
-# usage: translate between any 2 language using OpenNMT with little customized tokenizer
+# usage: translate between any 2 language using OpenNMT with sentencepiece tokenizer
 target: Vietnamese<br>
 source: Khmer <br>
 with result: <br>
