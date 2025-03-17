@@ -2,7 +2,7 @@ import subprocess
 
 
 def tokenize_file(input_file, output_file):
-    model_name = "source"
+    model_name = "target"
     command = ["spm_encode",
                 f"--model={model_name}.model",
                 "--input", input_file, 

@@ -8,8 +8,6 @@ run this script
 """
 import os
 import shutil
-import nltk
-nltk.download('punkt_tab')
 
 if os.path.exists("OpenNMT-py/onmt/model_builder.py"):
     os.remove("OpenNMT-py/onmt/model_builder.py")

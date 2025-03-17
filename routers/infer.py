@@ -7,16 +7,18 @@ from routers.model import MyHTTPException, \
 
 import os 
 import uuid
-import nltk
-from nltk.tokenize.treebank import TreebankWordDetokenizer
-from nltk import word_tokenize
+# import nltk
+# from nltk.tokenize.treebank import TreebankWordDetokenizer
+# from nltk import word_tokenize
 import subprocess
 import requests
 import configparser
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import torch 
 
 router = APIRouter()
 
-detokenizer = TreebankWordDetokenizer()
+# detokenizer = TreebankWordDetokenizer()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 static_folder = os.path.join(parent_dir, "static")
@@ -37,12 +39,8 @@ os.makedirs(ckpt_tokenizer_folder, exist_ok=True)
 split_folder = os.path.join(static_folder,"split_target_source")
 os.makedirs(split_folder, exist_ok=True)
 
-import nltk
-nltk.download('punkt_tab')
-
-
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-import torch 
+refined_file_to_translate_folder = os.path.join(parent_dir, "static", "refined_file_to_translate")
+os.makedirs(refined_file_to_translate_folder, exist_ok=True)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print (device)
 
@@ -96,19 +94,67 @@ def translate_file(model_path, src_path, output_path):
         print("Error:", process.stderr)
     print ("end process ....")
 
+# def detokenize_file(src_path, output_path, file_to_translate):
+#     vi_output = []
+#     en_output = []
+#     with open (file_to_translate, 'r') as f:
+#         need_translate_lines = f.readlines()
+#     with open(src_path, 'r') as f:
+#         lines = f.readlines()
+        
+#         for line in lines:
+#             line = line.strip()
+#             line = line.replace(" ", "")
+#             line = line.replace("▁", " ")
+#             en_output_line = detokenizer.detokenize(word_tokenize(line))
+#             en_output.append(en_output_line)
+#             # output.append(output_line)
+#             vi_output_line = mtet_translate_en(language = "en", inputs = en_output_line)
+            
+#             vi_output.append(vi_output_line)
+
+#     with open(output_path, 'w') as f:
+#         for index, line in enumerate(en_output):
+#             f.write(need_translate_lines[index])
+#             f.write("\n")
+
+#             if en_output[index] == None:
+#                 f.write("")
+#             else:
+#                 f.write(en_output[index])
+#             f.write("\n")
+
+#             if vi_output[index] == None:
+#                 f.write("")
+#             else:
+#                 f.write(vi_output[index])
+
+#             f.write("\n")
+#             f.write("____________________________________________________________________________________")
+#             f.write("\n")
+
+english_tokenization_checkpoints = "checkpoints/english.model"
 def detokenize_file(src_path, output_path, file_to_translate):
     vi_output = []
     en_output = []
     with open (file_to_translate, 'r') as f:
         need_translate_lines = f.readlines()
-    with open(src_path, 'r') as f:
+
+    import subprocess
+    model_path = english_tokenization_checkpoints
+    input = src_path
+    intermediate_output = src_path.replace(".txt", "detokenized.txt")
+    command = f"spm_decode --model={model_path} --input_format=piece < {input} > {intermediate_output}"
+    print (command)
+    # Running the subprocess with the provided command
+    subprocess.run(command, shell=True, check=True)    
+    time.sleep(3)
+    with open(intermediate_output, 'r') as f:
         lines = f.readlines()
-        
         for line in lines:
-            line = line.strip()
-            line = line.replace(" ", "")
-            line = line.replace("▁", " ")
-            en_output_line = detokenizer.detokenize(word_tokenize(line))
+            en_output_line = line.strip()
+            if not en_output_line.endswith("."):
+                en_output_line = en_output_line + "."
             en_output.append(en_output_line)
             # output.append(output_line)
             vi_output_line = mtet_translate_en(language = "en", inputs = en_output_line)
@@ -183,6 +229,8 @@ def send_request_tokenize(file_to_translate: str,
                   filepath = file_to_tokenize_path, 
                   source_checkpoint_tokenizer_path=source_checkpoint_tokenizer_path)    
     return tokenized_for_infer_file
+
+
 import time 
 def running_python(command):
     print ("************************************")
@@ -192,27 +240,6 @@ def running_python(command):
     time.sleep(4)
 
 
-# import requests
-# def translate_en(input_text, mtet_url):
-    
-
-#     payload = {'language': 'en',
-#     'inputs': input_text}
-#     files=[
-
-#     ]
-#     headers = {}
-
-#     response = requests.request("POST", mtet_url, headers=headers, data=payload, files=files)
-#     print ("************************************")
-#     print(response.text)
-#     json_response = response.json()
-#     res = json_response["result"]
-    
-#     return res
-
-refined_file_to_translate_folder = os.path.join(parent_dir, "static", "refined_file_to_translate")
-os.makedirs(refined_file_to_translate_folder, exist_ok=True)
 def refine_file_to_translate_func(file_path):
     refined_file_to_translate = os.path.join(refined_file_to_translate_folder, str(uuid.uuid4()) + ".txt")
     output = []
@@ -256,6 +283,13 @@ def mtet_translate_en(
     res = text[0].replace("vi: ", "")
     return res
 
+def calculate_num_lines(file_path):
+    with open(file_path, "r") as f:
+        lines = f.readlines()
+        num_lines = len(lines)
+        return num_lines
+
+
 import shutil
 @router.post("/train-opennmt")
 async def train_opennmt(
@@ -279,15 +313,9 @@ async def train_opennmt(
 @router.get("/get-checkpoint-opennmt-path")
 async def get_checkpoint_opennmt_path():
     filenames = os.listdir(ckpt_opennmt_folder)
-    filenames = [os.path.join(ckpt_opennmt_folder, name) for name in filenames]
+    filenames = [os.path.join(ckpt_opennmt_folder, name) for name in filenames if not name.endswith(".model")]
     return reply_success(message = "Done", result=filenames)
 
-
-def calculate_num_lines(file_path):
-    with open(file_path, "r") as f:
-        lines = f.readlines()
-        num_lines = len(lines)
-        return num_lines
 
 @router.post("/translate-language/")
 async def translate_language(
@@ -355,21 +383,6 @@ async def translate_language(
 
 
 
-from fastapi import FastAPI, HTTPException, Form, APIRouter
-from routers.model import MyHTTPException, \
-                        my_exception_handler, \
-                        reply_bad_request, \
-                        reply_server_error, \
-                        reply_success
-
-import os 
-import uuid
-import subprocess
-
-
-
-
-
 def split_target_source(target_source_file, output_src_file, output_target_file):
     path = target_source_file
     with open (path, "r") as f:
@@ -401,18 +414,6 @@ def split_target_source(target_source_file, output_src_file, output_target_file)
         for line in target_single_line_ls:
             f.write(line)
             f.write("\n")
-
-
-# def tokenize_file_infer(filepath, source_checkpoint_tokenizer_path):
-#     tokenized_for_infer_file = os.path.join(tokenized_for_infer_folder , str(uuid.uuid4()) + ".txt")
-#     command = ["spm_encode",
-#                 f"--model={source_checkpoint_tokenizer_path}",
-#                 "--input", filepath, 
-#                 "--output", tokenized_for_infer_file]
-#     print (" ".join(command))
-#     # Running the subprocess with the provided command
-#     result = subprocess.run(command, capture_output=True, text=True)
-#     return tokenized_for_infer_file
 
 
 import shutil
@@ -466,22 +467,8 @@ async def train_tokenizer(
 @router.get("/get-checkpoint-tokenizer-path")
 async def get_checkpoint_tokenizer_path():
     filenames = os.listdir(ckpt_tokenizer_folder)
-    filenames = [os.path.join(ckpt_tokenizer_folder, name) for name in filenames]
+    filenames = [os.path.join(ckpt_tokenizer_folder, name) for name in filenames if name.endswith(".model")]
     return reply_success(message = "Done", result=filenames)
 
-
-# @router.post("/tokenize-file")
-# async def tokenize_file(
-#     file_to_tokenize_path: str = Form(...),
-#     source_checkpoint_tokenizer_path: str = Form(...)
-#     ):
-#     if not os.path.exists(file_to_tokenize_path):
-#         raise MyHTTPException(status_code=404, message = f"{file_to_tokenize_path} not found")
-#     if not os.path.exists(source_checkpoint_tokenizer_path):
-#         raise MyHTTPException(status_code=404, message = f"{source_checkpoint_tokenizer_path} not found")
-#     tokenized_for_infer_file = tokenize_file_infer(
-#                   filepath = file_to_tokenize_path, 
-#                   source_checkpoint_tokenizer_path=source_checkpoint_tokenizer_path)    
-#     return reply_success(message = "Done", result=tokenized_for_infer_file)
 
 
