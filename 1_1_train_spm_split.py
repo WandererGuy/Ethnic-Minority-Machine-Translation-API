@@ -1,3 +1,16 @@
+import os 
+file_paths = [
+"vocab/example.vocab.src",
+"vocab/example.vocab.tgt",
+"target.model",
+"source.model",
+"source.vocab",
+"target.vocab"
+]
+for file_path in file_paths:
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
 path = "data/target_source.txt"
 with open (path, "r") as f:
     lines = f.readlines()

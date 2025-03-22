@@ -47,3 +47,4 @@ if __name__ == "__main__":
     remove_all_files_except(folder, file_to_keep)
     os.makedirs("output_train_log", exist_ok=True)
     os.makedirs("output_tensorboard_log", exist_ok=True)
+
