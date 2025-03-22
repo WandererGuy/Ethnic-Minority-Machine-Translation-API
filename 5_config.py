@@ -154,7 +154,7 @@ def write_train_no_bpe_config():
     # Where to save the checkpoints
     save_model: models/{timestamp}/model
     save_checkpoint_steps: 10000
-    valid_steps: 1000
+    valid_steps: 10000
     train_steps: 200000
 
     # Batching
@@ -231,7 +231,7 @@ def write_train_bpe_config():
     # Where to save the checkpoints
     save_model: models/{timestamp}/model
     save_checkpoint_steps: 10000
-    valid_steps: 1000
+    valid_steps: 10000
     train_steps: 200000
 
     # Batching
