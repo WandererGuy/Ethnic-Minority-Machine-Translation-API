@@ -166,9 +166,9 @@ def write_train_no_bpe_config():
 
     # Batching
     bucket_size: 262144
-    world_size: 4
-    gpu_ranks: [0, 1, 2, 3]
-    num_workers: 2
+
+    
+    num_workers: 4
     batch_type: "tokens"
     batch_size: 4096
     valid_batch_size: 2048
@@ -243,9 +243,9 @@ def write_train_bpe_config():
 
     # Batching
     bucket_size: 262144
-    world_size: 4
-    gpu_ranks: [0, 1, 2, 3]
-    num_workers: 2
+    
+    
+    num_workers: 4
     batch_type: "tokens"
     batch_size: 4096
     valid_batch_size: 2048
