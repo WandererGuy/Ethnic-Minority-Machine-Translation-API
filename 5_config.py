@@ -128,13 +128,20 @@ current_time = datetime.now()
 # Format the timestamp to include year, month, date, hour, and minute
 timestamp = current_time.strftime("%Y-%m-%d-%H-%M")
 
+model_path = "models/run2/model"
+save_data_path = "models/run2/example"
+delete_path = "models/run2"
+import shutil
 
+if os.path.exists(delete_path):
+    shutil.rmtree(delete_path)
+    os.makedirs(delete_path, exist_ok=True)
 # https://opennmt.net/OpenNMT-py/FAQ.html#how-do-i-train-the-transformer-model
 def write_train_no_bpe_config():
     config = f"""# data-no-bpe.yaml
 
     ## Where the samples will be written
-    save_data: models/{timestamp}/example
+    save_data: {save_data_path}
     ## Where the vocab(s) will be written
     src_vocab: vocab/example.vocab.src
     tgt_vocab: vocab/example.vocab.tgt
@@ -152,10 +159,10 @@ def write_train_no_bpe_config():
 
 
     # Where to save the checkpoints
-    save_model: models/{timestamp}/model
+    save_model: {model_path}
     save_checkpoint_steps: 10000
     valid_steps: 10000
-    train_steps: 200000
+    train_steps: 80000
 
     # Batching
     bucket_size: 262144
@@ -209,7 +216,7 @@ def write_train_bpe_config():
     config = f"""# khmer-viet.yaml
 
     ## Where the samples will be written
-    save_data: models/{timestamp}/example
+    save_data: {save_data_path}
     ## Where the vocab(s) will be written
     src_vocab: example.vocab.src
     tgt_vocab: example.vocab.tgt
@@ -229,10 +236,10 @@ def write_train_bpe_config():
 
 
     # Where to save the checkpoints
-    save_model: models/{timestamp}/model
+    save_model: {model_path}
     save_checkpoint_steps: 10000
     valid_steps: 10000
-    train_steps: 200000
+    train_steps: 80000
 
     # Batching
     bucket_size: 262144

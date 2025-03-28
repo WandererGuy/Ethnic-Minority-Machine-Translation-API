@@ -306,8 +306,10 @@ async def train_opennmt(
     command = ["python", "START_train.py"]
     running_python(command)
     time.sleep(5)
-    shutil.copy("models/run2/model_step_130000.pt", os.path.join(parent_dir, "checkpoints"))
-    os.rename (os.path.join(parent_dir, "checkpoints", "model_step_130000.pt"), os.path.join(parent_dir, "checkpoints", f"{checkpoint_name_prefix}_model_step_130000.pt"))
+    suffix = "model_step_80000.pt"
+    
+    shutil.copy(f"models/run2/{suffix}", os.path.join(parent_dir, "checkpoints"))
+    os.rename (os.path.join(parent_dir, "checkpoints", suffix), os.path.join(parent_dir, "checkpoints", f"{checkpoint_name_prefix}_{suffix}"))
     return reply_success(message = "Done and saved new checkpoint", result=None)
 
 @router.get("/get-checkpoint-opennmt-path")
@@ -325,6 +327,14 @@ async def translate_language(
     model_checkpoint_path : str = Form(...),
     source_checkpoint_tokenizer_path: str = Form(...)
 ):
+    if not os.path.exists(model_checkpoint_path):
+        raise MyHTTPException(status_code=404, message = f"{model_checkpoint_path} not found")
+    if not os.path.exists(source_checkpoint_tokenizer_path):
+        raise MyHTTPException(status_code=404, message = f"{source_checkpoint_tokenizer_path} not found")
+    if not model_checkpoint_path.endswith(".pt"):
+        raise MyHTTPException(status_code=404, message = f"{model_checkpoint_path} must be a .pt file")
+    if not source_checkpoint_tokenizer_path.endswith(".model"):
+        raise MyHTTPException(status_code=404, message = f"{source_checkpoint_tokenizer_path} must be a .model file")
     # file_contents = await file_to_translate.read()
     # content_str = file_contents.decode('utf-8')  # Assuming the file is UTF-8 encoded
     file_to_translate_folder = os.path.join(static_folder, "file_to_translate")
@@ -471,4 +481,8 @@ async def get_checkpoint_tokenizer_path():
     return reply_success(message = "Done", result=filenames)
 
 
-
+@router.get("/get-checkpoint-opennmt-path")
+async def get_checkpoint_opennmt_path():
+    filenames = os.listdir(ckpt_tokenizer_folder)
+    filenames = [os.path.join(ckpt_tokenizer_folder, name) for name in filenames if name.endswith(".pt")]
+    return reply_success(message = "Done", result=filenames)

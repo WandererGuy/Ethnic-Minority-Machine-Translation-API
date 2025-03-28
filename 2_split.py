@@ -43,6 +43,7 @@ import os
 os.makedirs('./data', exist_ok=True)
 path = './data/target_source.txt'
 import random
+random.seed(42)
 
 # Read the lines of the file
 with open(path, 'r', encoding='utf-8') as file:
