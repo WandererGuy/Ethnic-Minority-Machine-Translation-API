@@ -132,7 +132,7 @@ model_path = "models/run2/model"
 save_data_path = "models/run2/example"
 delete_path = "models/run2"
 import shutil
-
+import os 
 if os.path.exists(delete_path):
     shutil.rmtree(delete_path)
     os.makedirs(delete_path, exist_ok=True)

@@ -59,9 +59,10 @@ if __name__ == "__main__":
     check_env()
 
     # train tokenizer
+    print ("running 1_1_train_spm_split.py")
     command = ["python", "1_1_train_spm_split.py"]
     running_python(command)
-
+    time.sleep(10)
     for vocab_size in [8000, 4000, 2000]:
         if train_source_spm(vocab_size) == False:
             print ("******************** reduce vocab size ********************")
@@ -77,21 +78,31 @@ if __name__ == "__main__":
             continue 
         else:
             break
-
+    print ("running 1_4_check_prepare.py")
     command = ["python", "1_4_check_prepare.py"]
     running_python(command)
+    time.sleep(10)
 
+    print ("running 2_split.py")
     command = ["python", "2_split.py"]
     running_python(command)
+    time.sleep(10)
 
+    print ("running 3_tokenize_source.py")
     command = ["python", "3_tokenize_source.py"]
     running_python(command)
+    time.sleep(10)
 
+    print ("running 4_tokenize_target.py")
     command = ["python", "4_tokenize_target.py"]
     running_python(command)
-
+    time.sleep(10)
+    
+    print ("running 5_config.py")
     command = ["python", "5_config.py"]
     running_python(command)
+    time.sleep(10)
 
+    print ("running 6_train-no-bpe.sh")
     command = ["bash", "6_train-no-bpe.sh"]
     running_bash_file(command)

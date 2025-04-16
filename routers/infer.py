@@ -133,22 +133,22 @@ def translate_file(model_path, src_path, output_path):
 #             f.write("____________________________________________________________________________________")
 #             f.write("\n")
 
-english_tokenization_checkpoints = "checkpoints/english.model"
-def detokenize_file(src_path, output_path, file_to_translate):
+# english_tokenization_checkpoints = "checkpoints/english.model"
+def detokenize_file(src_path, output_path, file_to_translate, target_checkpoint_tokenizer_path):
     vi_output = []
     en_output = []
     with open (file_to_translate, 'r') as f:
         need_translate_lines = f.readlines()
 
     import subprocess
-    model_path = english_tokenization_checkpoints
+    model_path = target_checkpoint_tokenizer_path
     input = src_path
     intermediate_output = src_path.replace(".txt", "detokenized.txt")
     command = f"spm_decode --model={model_path} --input_format=piece < {input} > {intermediate_output}"
     print (command)
     # Running the subprocess with the provided command
     subprocess.run(command, shell=True, check=True)    
-    time.sleep(3)
+    time.sleep(10)
     with open(intermediate_output, 'r') as f:
         lines = f.readlines()
         for line in lines:
@@ -290,26 +290,108 @@ def calculate_num_lines(file_path):
         return num_lines
 
 
+import pandas as pd
+import os
+
+
+
+def check_excel_columns(file_path, required_columns=['target', 'source']):
+    # Step 1: Check if file exists
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    try:
+        # Step 2: Try to load the Excel file
+        df = pd.read_excel(file_path, engine='openpyxl')
+    except Exception as e:
+        raise ValueError(f"Failed to read Excel file: {e}")
+
+    # Optional: Normalize column names (trim spaces, make lowercase)
+    # df.columns = [col.strip().lower() for col in df.columns]
+    
+    # Step 3: Check for required columns
+    missing = [col for col in required_columns if col not in df.columns]
+    if missing:
+        raise ValueError(f"Missing column(s): {', '.join(missing)}")
+
+    print("✅ Excel file is valid and contains required columns.")
+
+# Example usage
+def excel_to_txt(excel_file_path, txt_file_path):
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(txt_file_path), exist_ok=True)
+    
+    target_source_dict = {}
+    df = pd.read_excel(excel_file_path, engine='openpyxl')
+    for index, row in df.iterrows():
+        target_source_dict[str(row['target']).strip().replace("\t", " ")] = str(row['source']).strip().replace("\t", " ")
+    
+    print(f"Attempting to write to: {txt_file_path}")  # Debug print
+    
+    try:
+        with open(txt_file_path, 'w', errors="ignore", encoding="utf-8") as f:
+            for target, source in target_source_dict.items():
+                try:
+                    f.write(f"{target}\t{source}\n")
+                except Exception as e:
+                    print(f'Cannot write line: {e}')
+    except Exception as e:
+        print(f'Failed to open/write file: {e}')
+        raise
+    time.sleep(10)
+    print(f"✅ Successfully wrote to: {txt_file_path} and will quickly be copied to ./data for inference")
+
+
+
 import shutil
 @router.post("/train-opennmt")
 async def train_opennmt(
     target_source_file: str = Form(...),
-    checkpoint_name_prefix: str = Form(...)
+    checkpoint_name_prefix: str = Form(...), 
+    input_type: str = Form(...)
     ):
+
     if not os.path.exists(target_source_file):
         raise MyHTTPException(status_code=404, message = f"{target_source_file} not found")
+    if input_type == 'excel':
+        target_source_folder = os.path.join(static_folder, "target_source")
+        os.makedirs(target_source_folder, exist_ok=True)
+        check_excel_columns(target_source_file)
+        txt_file_path = os.path.join(target_source_folder, str(uuid.uuid4()) + ".txt")
+        
+        
+        excel_to_txt(target_source_file, txt_file_path)
+
+        target_source_file = txt_file_path
+    elif input_type =='txt':
+        pass
+    else:
+        raise MyHTTPException(status_code=404, message = f"mode must be excel or txt")
     data_folder = os.path.join(parent_dir, "data")
     os.makedirs(data_folder, exist_ok=True)
+
+    
+
     shutil.copy(target_source_file, data_folder)
-    os.rename(os.path.join(data_folder, target_source_file), os.path.join(data_folder, "target_source.txt"))
-    time.sleep(5)
+    time.sleep(10)
+    os.remove(os.path.join(data_folder, "target_source.txt"))
+    time.sleep(10)
+    os.rename(os.path.join(data_folder, os.path.basename(target_source_file)), os.path.join(data_folder, "target_source.txt"))
+
+    time.sleep(10)
     command = ["python", "START_train.py"]
     running_python(command)
-    time.sleep(5)
+    time.sleep(10)
     suffix = "model_step_80000.pt"
+    suffix_name = "checkpoint.pt"
     
     shutil.copy(f"models/run2/{suffix}", os.path.join(parent_dir, "checkpoints"))
-    os.rename (os.path.join(parent_dir, "checkpoints", suffix), os.path.join(parent_dir, "checkpoints", f"{checkpoint_name_prefix}_{suffix}"))
+    os.rename (os.path.join(parent_dir, "checkpoints", suffix), os.path.join(parent_dir, "checkpoints", f"{checkpoint_name_prefix}_{suffix_name}"))
+    shutil.copy("source.model", os.path.join(parent_dir, "checkpoints"))
+    os.rename (os.path.join(parent_dir, "checkpoints", "source.model"), os.path.join(parent_dir, "checkpoints", f"{checkpoint_name_prefix}_source.model"))
+    shutil.copy("target.model", os.path.join(parent_dir, "checkpoints"))
+    os.rename (os.path.join(parent_dir, "checkpoints", "target.model"), os.path.join(parent_dir, "checkpoints", f"{checkpoint_name_prefix}_target.model"))
+
     return reply_success(message = "Done and saved new checkpoint", result=None)
 
 @router.get("/get-checkpoint-opennmt-path")
@@ -325,7 +407,8 @@ async def translate_language(
     # lang_source: str = Form(...),
     file_to_translate_content: str = Form(...),
     model_checkpoint_path : str = Form(...),
-    source_checkpoint_tokenizer_path: str = Form(...)
+    source_checkpoint_tokenizer_path: str = Form(...), 
+    target_checkpoint_tokenizer_path: str = Form(...)
 ):
     if not os.path.exists(model_checkpoint_path):
         raise MyHTTPException(status_code=404, message = f"{model_checkpoint_path} not found")
@@ -335,6 +418,9 @@ async def translate_language(
         raise MyHTTPException(status_code=404, message = f"{model_checkpoint_path} must be a .pt file")
     if not source_checkpoint_tokenizer_path.endswith(".model"):
         raise MyHTTPException(status_code=404, message = f"{source_checkpoint_tokenizer_path} must be a .model file")
+    if not target_checkpoint_tokenizer_path.endswith(".model"):
+        raise MyHTTPException(status_code=404, message = f"{target_checkpoint_tokenizer_path} must be a .model file")
+
     # file_contents = await file_to_translate.read()
     # content_str = file_contents.decode('utf-8')  # Assuming the file is UTF-8 encoded
     file_to_translate_folder = os.path.join(static_folder, "file_to_translate")
@@ -376,7 +462,8 @@ async def translate_language(
 
     detokenize_file(src_path=output_filepath, 
                     output_path=detokenized_output_filepath, 
-                    file_to_translate = refined_file_to_translate
+                    file_to_translate = refined_file_to_translate,
+                    target_checkpoint_tokenizer_path = target_checkpoint_tokenizer_path
                     )
     t = rf"{os.path.basename(translate_output_folder)}/{os.path.basename(detokenized_output_filepath)}"
     
@@ -454,8 +541,22 @@ def train_init(train_file, train_tokenizer_name):
 
 @router.post("/split-target-source-file")
 async def split_target_source_file(
-    target_source_file: str = Form(...)
+    target_source_file: str = Form(...), 
+    input_type: str = Form(...)
     ):
+    if input_type == 'excel':
+        target_source_folder = os.path.join(static_folder, "target_source")
+        os.makedirs(target_source_folder, exist_ok=True)
+        check_excel_columns(target_source_file)
+        txt_file_path = os.path.join(target_source_folder, str(uuid.uuid4()) + ".txt")
+        
+        
+        excel_to_txt(target_source_file, txt_file_path)
+
+        target_source_file = txt_file_path
+    elif input_type =='txt':
+        pass
+
     if not os.path.exists(target_source_file):
         raise MyHTTPException(status_code=404, message = f"{target_source_file} not found")
     output_src_file = os.path.join(split_folder, str(uuid.uuid4()) + ".txt")

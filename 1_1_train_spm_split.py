@@ -20,7 +20,10 @@ with open (path, "r") as f:
         if tab_count != 1:
             raise Exception("each line must have 1 tab only between source and target sentence")
 
-
+import random 
+random.seed(42)
+max_num = 2000000
+# sample 2000000 sentence for train tokenizer 
 path = "data/target_source.txt"
 with open (path, "r") as f:
     lines = f.readlines()
@@ -32,12 +35,18 @@ with open (path, "r") as f:
         source_single_line_ls.append(source)
         target_single_line_ls.append(target)
 source_dest_path = "data/source.txt"
+new_source_single_line_ls = random.sample(source_single_line_ls, max_num)
+new_target_single_line_ls = random.sample(target_single_line_ls, max_num)
 with open (source_dest_path, "w") as f:
-    for line in source_single_line_ls:
+    for index, line in enumerate(new_source_single_line_ls):
         f.write(line)
         f.write("\n")
+    
+        
 target_dest_path = "data/target.txt"
 with open (target_dest_path, "w") as f:
-    for line in target_single_line_ls:
+    for index, line in enumerate(new_target_single_line_ls):
         f.write(line)
         f.write("\n")
+        
+            
