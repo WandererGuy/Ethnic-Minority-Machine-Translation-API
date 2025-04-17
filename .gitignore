@@ -13,3 +13,5 @@ target.model
 /target_source
 /output_tensorboard_log
 /output_tensorboard_now
+/label_only_vie
+/target_source

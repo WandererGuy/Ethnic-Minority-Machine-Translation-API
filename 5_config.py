@@ -188,6 +188,7 @@ def write_train_no_bpe_config():
     param_init_glorot: true
     normalization: "tokens"
 
+    
     # Model
     encoder_type: transformer
     decoder_type: transformer

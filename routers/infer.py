@@ -388,8 +388,10 @@ async def train_opennmt(
     shutil.copy(f"models/run2/{suffix}", os.path.join(parent_dir, "checkpoints"))
     os.rename (os.path.join(parent_dir, "checkpoints", suffix), os.path.join(parent_dir, "checkpoints", f"{checkpoint_name_prefix}_{suffix_name}"))
     shutil.copy("source.model", os.path.join(parent_dir, "checkpoints"))
+    time.sleep(10)
     os.rename (os.path.join(parent_dir, "checkpoints", "source.model"), os.path.join(parent_dir, "checkpoints", f"{checkpoint_name_prefix}_source.model"))
     shutil.copy("target.model", os.path.join(parent_dir, "checkpoints"))
+    time.sleep(10)
     os.rename (os.path.join(parent_dir, "checkpoints", "target.model"), os.path.join(parent_dir, "checkpoints", f"{checkpoint_name_prefix}_target.model"))
 
     return reply_success(message = "Done and saved new checkpoint", result=None)
