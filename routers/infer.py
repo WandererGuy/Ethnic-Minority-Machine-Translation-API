@@ -374,7 +374,8 @@ async def train_opennmt(
 
     shutil.copy(target_source_file, data_folder)
     time.sleep(10)
-    os.remove(os.path.join(data_folder, "target_source.txt"))
+    if os.path.exists(os.path.join(data_folder, "target_source.txt")):
+        os.remove(os.path.join(data_folder, "target_source.txt"))
     time.sleep(10)
     os.rename(os.path.join(data_folder, os.path.basename(target_source_file)), os.path.join(data_folder, "target_source.txt"))
 

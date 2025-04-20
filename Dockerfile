@@ -35,20 +35,23 @@ RUN pip install nltk
 RUN pip install fastapi uvicorn pydantic python-multipart
 RUN pip install transformers
 RUN pip install OpenNMT-tf
+
 RUN pip install tensorflow
-RUN pip install 'keras<3.0.0' mediapipe-model-maker
+RUN pip install 'keras<3.0.0'
+# RUN pip install 'keras<3.0.0' mediapipe-model-maker
+
+# RUN pip install "pyyaml>6.0.0" "keras<3.0.0" "tensorflow<2.16" "tf-models-official<2.16" 
+RUN pip install mediapipe-model-maker --no-deps
 RUN mkdir data
-RUN cp target_source/target_source_ede.txt data
-RUN mv data/target_source_ede.txt data/target_source.txt
 
 # Make the script executable
 # RUN chmod +x /app/script.sh
 RUN ln -s /usr/bin/python3 /usr/bin/python
 # port in config/config.ini
 RUN pip install gdown
-RUN gdown --folder https://drive.google.com/drive/folders/13i46pilo1kOMIAn-t2XKXnvCEDYuvOb9
+# RUN gdown --folder https://drive.google.com/drive/folders/13i46pilo1kOMIAn-t2XKXnvCEDYuvOb9
+RUN pip install pandas
 EXPOSE 5021 
-CMD ["python", "main.py"]
 
 # docker build  --no-cache -t nmt_main .    
 # docker run -it --gpus all -p 5021:5021 nmt_main
@@ -63,3 +66,5 @@ CMD ["python", "main.py"]
 
 # # Set the default python version to 3.10
 # RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+# docker run -it --gpus all -p 5021:5021 -v D:\MANH_T04:/app nmt_main
+# RUN gdown https://drive.google.com/uc?id=1qvLCV9xzMOZvlsvqRvBjksZmNo_LFC6C
