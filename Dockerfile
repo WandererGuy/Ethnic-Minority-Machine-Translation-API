@@ -69,6 +69,8 @@ EXPOSE 5021
 #     && apt-get install -y python3.10 python3.10-venv python3.10-dev
 
 # # Set the default python version to 3.10
+# echo "Hello, world!" > data/target_source.txt
+
 # RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
-# docker run -it --gpus all -p 5021:5021 -v D:\MANH_T04:/app nmt_main
+# docker run -it --gpus all -e CUDA_LAUNCH_BLOCKING=1 -p 5021:5021 -v D:\MANH_T04:/app/Ethnic-Minority-Machine-Translation-API/checkpoint nmt_main
 # RUN gdown https://drive.google.com/uc?id=1qvLCV9xzMOZvlsvqRvBjksZmNo_LFC6C
