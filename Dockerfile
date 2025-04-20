@@ -51,6 +51,10 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip install gdown
 # RUN gdown --folder https://drive.google.com/drive/folders/13i46pilo1kOMIAn-t2XKXnvCEDYuvOb9
 RUN pip install pandas
+RUN mkdir target_source
+WORKDIR /app/Ethnic-Minority-Machine-Translation-API/target_source
+RUN gdown https://drive.google.com/uc?id=1qvLCV9xzMOZvlsvqRvBjksZmNo_LFC6C
+WORKDIR /app/Ethnic-Minority-Machine-Translation-API
 EXPOSE 5021 
 
 # docker build  --no-cache -t nmt_main .    
