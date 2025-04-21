@@ -15,6 +15,7 @@ path = "data/target_source.txt"
 with open (path, "r") as f:
     lines = f.readlines()
     for line in lines:
+        num_lines = len(lines)
         line = line.strip("\n")
         tab_count = line.count('\t')
         if tab_count != 1:
@@ -22,7 +23,10 @@ with open (path, "r") as f:
 
 import random 
 random.seed(42)
-max_num = 2000000
+if num_lines > 2000000:
+    max_num = 2000000
+else:
+    max_num = num_lines
 # sample 2000000 sentence for train tokenizer 
 path = "data/target_source.txt"
 with open (path, "r") as f:
