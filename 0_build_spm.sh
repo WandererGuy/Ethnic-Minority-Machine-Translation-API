@@ -1,4 +1,5 @@
 #!/bin/bash
+sudo apt-get update && apt-get install -y
 sudo apt-get install cmake build-essential pkg-config libgoogle-perftools-dev
 git clone https://github.com/google/sentencepiece.git 
 cd sentencepiece

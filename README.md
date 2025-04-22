@@ -10,11 +10,22 @@ converge at epoch 120k-140k
 # medium post
 https://medium.com/@manhtech264/neural-machine-translation-between-any-2-languages-part-1-74980f50e3a6
 
+# prepare env (better to run eacvh command in bash file manually)
+```
+bash 0_build_spm.sh
+bash 0_create_env.sh
+```
+# run server 
+```
+python main.py
+```
+# usage 
+use postman to send API to server , read about API in ./routers/infer.py
 # dockerfile
 U can run a demo use Docker by simple build image with Dockerfile then run the built image 
 from the repo
 ```
-docker build -t myapp .    
-docker run -it --name myapp_container --gpus all -p 3000:4000 myapp
+docker build  --no-cache -t nmt_main .    
+docker run -it -p 5021:5021 -v D:\MANH_T04:/app/Ethnic-Minority-Machine-Translation-API/checkpoints nmt_main
 ```
 

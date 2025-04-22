@@ -1,18 +1,41 @@
-# Step 1: Use Ubuntu 22.04 as the base image
-FROM ubuntu:22.04
+# # Use CUDA 11.3.1 on Ubuntu 20.04 as the build/runtime base
+# FROM ubuntu:22.04
 
-# Step 2: Set the working directory in the container
+# # Step 2: Set the working directory in the container
+# WORKDIR /app
+# # COPY . /app
+
+# # Step 3: Install any required dependencies
+# RUN apt-get update && apt-get install -y \
+#     python3 \
+#     python3-pip \
+#     curl \
+#     git \
+#     # Add any additional dependencies your application requires
+#     && rm -rf /var/lib/apt/lists/*
+FROM nvidia/cuda:12.8.1-base-ubuntu22.04
+
+# 1) Make all apt installs non‑interactive
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+
 WORKDIR /app
-# COPY . /app
 
-# Step 3: Install any required dependencies
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    curl \
-    git \
-    # Add any additional dependencies your application requires
-    && rm -rf /var/lib/apt/lists/*
+# 2) Install everything you need in one go, including tzdata
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      python3 \
+      python3-pip \
+      curl \
+      git \
+      cmake \
+      build-essential \
+      pkg-config \
+      libgoogle-perftools-dev \
+      tzdata \
+ && rm -rf /var/lib/apt/lists/*
+
+
 RUN git clone https://github.com/WandererGuy/Ethnic-Minority-Machine-Translation-API.git
 WORKDIR /app/Ethnic-Minority-Machine-Translation-API
 RUN apt-get update
@@ -68,9 +91,7 @@ EXPOSE 5021
 #     && apt-get update \
 #     && apt-get install -y python3.10 python3.10-venv python3.10-dev
 
-# # Set the default python version to 3.10
-# echo "Hello, world!" > data/target_source.txt
 
 # RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
-# docker run -it --gpus all -e CUDA_LAUNCH_BLOCKING=1 -p 5021:5021 -v D:\MANH_T04:/app/Ethnic-Minority-Machine-Translation-API/checkpoint nmt_main
+# docker run -it --gpus all -e CUDA_LAUNCH_BLOCKING=1 -p 5021:5021 -v D:\MANH_T04:/app/Ethnic-Minority-Machine-Translation-API/checkpoints nmt_main
 # RUN gdown https://drive.google.com/uc?id=1qvLCV9xzMOZvlsvqRvBjksZmNo_LFC6C

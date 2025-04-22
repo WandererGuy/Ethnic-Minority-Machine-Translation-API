@@ -5,7 +5,7 @@ source "$value"  # Adjust to your conda installation path
 current_dir=$(pwd)
 # first_anaconda_env="$(pwd)/env_1"
 # echo "$first_anaconda_env"
-second_anaconda_env="$(pwd)/env_2"
+second_anaconda_env="$(pwd)/env"
 echo "$second_anaconda_env"
 # conda create -p $first_anaconda_env python=3.10 -y
 conda create -p $second_anaconda_env python=3.10 -y
@@ -20,5 +20,11 @@ mv OpenNMT-py-2.3.0 OpenNMT-py
 cd OpenNMT-py
 pip install -e .
 cd ..
-pip install nltk
 pip install fastapi uvicorn pydantic python-multipart
+pip install transformers
+pip install OpenNMT-tf
+pip install tensorflow
+pip install 'keras<3.0.0'
+pip install mediapipe-model-maker --no-deps
+pip install gdown
+pip install pandas
