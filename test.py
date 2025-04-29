@@ -23,7 +23,11 @@ with open(file_path, "r", encoding="utf-8") as f:
         only_viet_rows.append({"Vietnamese": vi})
 # 2. Build a DataFrame and write to Excel
 df = pd.DataFrame(rows)
+df = df.drop_duplicates().reset_index(drop=True)
+
 only_viet_df = pd.DataFrame(only_viet_rows)
+only_viet_df = only_viet_df.drop_duplicates().reset_index(drop=True)
+
 # you can choose engine="xlsxwriter" or engine="openpyxl" if you like:
 df.to_csv("en_vi_label.csv", index=False, encoding="utf-8")
 only_viet_df.to_csv("only_vi_label.csv", index=False, encoding="utf-8")
