@@ -15,3 +15,5 @@ target.model
 /output_tensorboard_now
 /label_only_vie
 /target_source
+en_vi_label.csv
+only_vi_label.csv

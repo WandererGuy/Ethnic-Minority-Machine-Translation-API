@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Form, APIRouter
+from fastapi import FastAPI, HTTPException, Form, APIRouter, UploadFile, File
 from routers.model import MyHTTPException, \
                         my_exception_handler, \
                         reply_bad_request, \
@@ -475,11 +475,127 @@ async def translate_language(
     #     content = file.read()
 
     url = f"http://127.0.0.1:{port_num}/static/{t}"
+    # url = f"https://ee1f-2402-800-62d0-50a9-958c-53b6-aff3-e7c9.ngrok-free.app/static/{t}"
+
     return reply_success(
         message="Translation success",
         result=url)
 
 
+def fix_windows_path(path):
+    path = path.replace("\\", "/")
+    if "C:" in path:
+        path = path.replace("C:", "/mnt/c")
+    elif "D:" in path:
+        path = path.replace("D:", "/mnt/d")
+    return path
+
+@router.post("/translate-language-for-eval")
+async def translate_language_for_eval(
+    # file_to_translate: str = Form(...),
+    # lang_source: str = Form(...),
+    file_upload_path: str = Form(...),
+    model_checkpoint_path : str = Form(...),
+    source_checkpoint_tokenizer_path: str = Form(...), 
+    target_checkpoint_tokenizer_path: str = Form(...)
+):
+    if not os.path.exists(model_checkpoint_path):
+        raise MyHTTPException(status_code=404, message = f"{model_checkpoint_path} not found")
+    if not os.path.exists(source_checkpoint_tokenizer_path):
+        raise MyHTTPException(status_code=404, message = f"{source_checkpoint_tokenizer_path} not found")
+    if not model_checkpoint_path.endswith(".pt"):
+        raise MyHTTPException(status_code=404, message = f"{model_checkpoint_path} must be a .pt file")
+    if not source_checkpoint_tokenizer_path.endswith(".model"):
+        raise MyHTTPException(status_code=404, message = f"{source_checkpoint_tokenizer_path} must be a .model file")
+    if not target_checkpoint_tokenizer_path.endswith(".model"):
+        raise MyHTTPException(status_code=404, message = f"{target_checkpoint_tokenizer_path} must be a .model file")
+
+    # file_contents = await file_to_translate.read()
+    # content_str = file_contents.decode('utf-8')  # Assuming the file is UTF-8 encoded
+    file_to_translate_folder = os.path.join(static_folder, "file_to_translate")
+    os.makedirs(file_to_translate_folder, exist_ok=True)
+    new_save_path = os.path.join(file_to_translate_folder, str(uuid.uuid4()) + ".txt")  # Adjust the path as needed
+
+
+    # # 1. Đọc toàn bộ nội dung
+    # contents = await file_upload.read()  # bytes
+
+    # # 2. Chuyển thành chuỗi nếu muốn xử lý text
+    # text = contents.decode("utf-8")
+    with open (fix_windows_path(file_upload_path), "r", encoding="utf-8") as f:
+        text = f.read()
+    # 3. Ghi ra file 'uploaded.txt'
+    with open(new_save_path, "w", encoding="utf-8") as f:
+        f.write(text)
+
+
+    file_to_translate = new_save_path
+    refined_file_to_translate = refine_file_to_translate_func(file_to_translate)
+    print ("****** original file after refined ******")
+    print (refined_file_to_translate)
+    checkpoint_folder = "checkpoints"
+    os.makedirs(checkpoint_folder, exist_ok=True)
+    host_ip, port_num = load_main_config()
+
+    # allow_lang = ["khmer", "ede"]
+    # if lang_source not in allow_lang:
+    #     raise MyHTTPException(status_code=400, message="Language not supported")
+
+    res = send_request_tokenize(file_to_translate = refined_file_to_translate, 
+                            source_checkpoint_tokenizer_path = source_checkpoint_tokenizer_path
+                            )
+    # res_json = handle_response(res)
+    # tokenized_file = res_json["result"]
+    tokenized_file = res
+    output_filepath = os.path.join(translate_output_folder, str(uuid.uuid4()) + ".txt")
+
+    if calculate_num_lines(refined_file_to_translate) != calculate_num_lines(tokenized_file):
+        raise MyHTTPException(status_code=500, message="Tokenization failed with wrong number of lines")
+    
+    translate_file(
+        model_path=model_checkpoint_path,
+        src_path=tokenized_file,
+        output_path=output_filepath)
+    detokenized_output_filepath = output_filepath.replace(".txt", "_detokenized.txt")
+
+    if calculate_num_lines(refined_file_to_translate) != calculate_num_lines(output_filepath):
+        raise MyHTTPException(status_code=500, message="TRANSLATION failed with wrong number of lines")
+
+    detokenize_file(src_path=output_filepath, 
+                    output_path=detokenized_output_filepath, 
+                    file_to_translate = refined_file_to_translate,
+                    target_checkpoint_tokenizer_path = target_checkpoint_tokenizer_path
+                    )
+    t = rf"{os.path.basename(translate_output_folder)}/{os.path.basename(detokenized_output_filepath)}"
+    
+    # t_path = os.path.join(static_folder, os.path.basename(translate_output_folder), os.path.basename(detokenized_output_filepath))
+    # with open(t_path, "r") as file:
+    #     content = file.read()
+
+    # url = f"http://127.0.0.1:{port_num}/static/{t}"
+    # url = f"https://ee1f-2402-800-62d0-50a9-958c-53b6-aff3-e7c9.ngrok-free.app/static/{t}"
+
+    temp_file = os.path.join(static_folder, t)
+    final_name = t.replace(".txt", "_only_en.txt")
+    final_file = os.path.join(static_folder, final_name)
+    sep = "____________________________________________________________________________________"
+    t = []
+    with open (temp_file, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+        for index, line in enumerate(lines):
+            line = line.strip("\n")
+            if line == sep:
+                t.append(lines[index-2].strip("\n"))
+    with open (final_file, "w", encoding="utf-8") as f:
+        for line in t:
+            f.write(line)
+            f.write("\n")
+    # url = f"http://127.0.0.1:{port_num}/static/{final_name}"
+    url = final_file
+    # url = f"https://ee1f-2402-800-62d0-50a9-958c-53b6-aff3-e7c9.ngrok-free.app/static/{final_name}"
+    return reply_success(
+        message="Translation success",
+        result=url)
 
 
 

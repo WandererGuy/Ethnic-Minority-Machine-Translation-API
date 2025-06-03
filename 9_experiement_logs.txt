@@ -1,0 +1,21 @@
+
+for 6 Million pair 
+perl OpenNMT-py/tools/multi-bleu-detok.perl /home/manh264/code_linux/NMT_server/src/prepare_eval_dataset_2/groundtruth_en.txt < /home/manh264/code_linux/NMT_server/src/static/translate_output/9a22ac50-f986-4d98-a41a-dce94e4ad27e_detokenized_only_en.txt
+BLEU = 38.85, 71.4/46.9/33.6/24.8 (BP=0.950, ratio=0.951, hyp_len=12189, ref_len=12815)
+
+output:
+/home/manh264/code_linux/NMT_server/src/static/translate_output/9a22ac50-f986-4d98-a41a-dce94e4ad27e_detokenized_only_en.txt
+
+
+for 2 Million pair 
+(env) (base) root@MANH-KOOL:/home/manh264/code_linux/NMT_server/src# perl OpenNMT-py/tools/multi-bleu-detok.perl /home/manh264/code_linux/NMT_server/src/prepare_eval_dataset_2/groundtruth_en.txt < /home/manh264/code_linux/NMT_server/src/static/translate_output/94782a18-cb5b-489a-a6f4-9d4b6dc2e447_detokenized_only_en.txt
+BLEU = 36.26, 69.6/44.1/31.0/22.5 (BP=0.949, ratio=0.950, hyp_len=12172, ref_len=12815)
+
+output: 
+/home/manh264/code_linux/NMT_server/src/static/translate_output/94782a18-cb5b-489a-a6f4-9d4b6dc2e447_detokenized_only_en.txt
+
+
+
+
+groundtruth 
+/home/manh264/code_linux/NMT_server/src/prepare_eval_dataset_2/groundtruth_en.txt
