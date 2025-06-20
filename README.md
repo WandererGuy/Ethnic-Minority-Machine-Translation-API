@@ -1,10 +1,13 @@
+# demo 
+i have prepare a notebook demo to translate Vietnamese to English (to demonstrate that this model can performe well on high resource language like Vietnam and English)
+Demo usage by simply run notebook and see result in this repo : Vietnam_to_English_Translation_Demo.ipynb
+
 # usage: translate between any 2 language using OpenNMT with sentencepiece tokenizer
 target: Vietnamese<br>
 source: Khmer <br>
 with result: <br>
 no bpe tokenize (better than bpe) -> Khmer to Vietnamese -> train_acc : 70%, val_acc: 39% <br>
 Experiment more (no bpe tokenize) -> Khmer to English -> train_acc : 90%, val_acc : 63% <br>
-future solution : Khmer -> English -> Vietnamese (english to vietnam using MTeT repo)
 
 converge at epoch 120k-140k
 # medium post
