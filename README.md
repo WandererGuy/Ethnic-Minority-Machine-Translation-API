@@ -51,4 +51,5 @@ docker run -it -p 5021:5021 -v D:\MANH_T04:/app/Ethnic-Minority-Machine-Translat
 ```
 
 # future work:
-i have pay my attention to NLLB model from Meta , this is a tutorial for translate between any 2 language
+i have pay my attention to NLLB model from Meta , this is a tutorial for translate between any 2 language<br>
+https://cointegrated.medium.com/how-to-fine-tune-a-nllb-200-model-for-translating-a-new-language-a37fc706b865
