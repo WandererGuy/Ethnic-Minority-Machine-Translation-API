@@ -30,10 +30,11 @@ converge at epoch 120k-140k
 # medium post
 https://medium.com/@manhtech264/neural-machine-translation-between-any-2-languages-part-1-74980f50e3a6
 
-# prepare env (Updated: better to run eacvh command in bash file manually)
+# prepare env (better to run each command)
+follow these 2 files
 ```
-bash 0_build_spm.sh
-bash 0_create_env.sh
+0_build_spm.md
+0_create_env.md
 ```
 # run server 
 ```
